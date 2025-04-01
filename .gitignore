@@ -1,0 +1,8 @@
+.venv
+testes
+db.sqlite3
+__pycache__
+__init__.py
+migrations
+tests.py 
+.env
