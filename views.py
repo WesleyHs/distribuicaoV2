@@ -8,6 +8,10 @@ import pandas as pd
 from datetime import datetime
 import time
 from rest_framework.response import Response
+from django.db.models import Q
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Teste(generics.ListCreateAPIView):
@@ -22,7 +26,7 @@ class Teste3(APIView):
 
     def post(self, requests):
 
-        token = ''
+        token = '38590d5eb1d0ec038d34057b004022eb8f2624eb'
         quadro = 'http://127.0.0.1:8000/api/v1/quadro_metas'
         atribuido = 'http://127.0.0.1:8000/api/v1/atribuicao'
         url8 = "http://127.0.0.1:8000/api/v1/testedistribuicao2/"
@@ -85,21 +89,111 @@ class Teste3(APIView):
         for dept, result in departamentos_resultados.items():
             print(f"\nResultados para {dept}:")
         
-        df_final = df_final.rename(
-            columns={
-                'id': 'idAgente',
-                'id_distribuicao': 'id',
-            })
-        
-        for index, row in df_final.iterrows():
-            response = r.post(url8, json=row.to_dict())
-            # time.sleep(4)
+            df_final = df_final.rename(
+                columns={
+                    'id': 'idAgente',
+                    'id_distribuicao': 'id',
+                })
+            
+            for index, row in df_final.iterrows():
+                response = r.post(url8, json=row.to_dict())
+                # time.sleep(4)
         fim = datetime.now()
 
         print("fim", fim)
 
         return Response(df_final.to_dict(orient='records')) 
-        
 
 
 
+class Teste4(generics.RetrieveUpdateAPIView):
+    serializer_class = DistribuicaoV2Serializer
+    lookup_field = 'idAgente'
+
+    def get_queryset(self):
+        idAgente = self.kwargs['idAgente']
+        logger.info(f"Getting queryset for idAgente: {idAgente}")
+        return modelDistribuicaoV2.objects.filter(idAgente=idAgente, id_monitoria__isnull=True)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = queryset.first()
+        if obj is None:
+            logger.error(f"Object not found for idAgente: {self.kwargs['idAgente']}")
+            raise status.HTTP_404_NOT_FOUND
+        logger.info(f"Object found: {obj}")
+        return obj
+
+    def get(self, request, *args, **kwargs):
+        logger.info(f"GET request received for idAgente: {kwargs['idAgente']}")
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            logger.info(f"GET request successful, returning data: {serializer.data}")
+            return Response(serializer.data)
+        except status.HTTP_404_NOT_FOUND:
+            logger.warning(f"GET request failed: Object not found for idAgente: {kwargs['idAgente']}")
+            return Response({"message": "No record found with id_monitoria null"}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, *args, **kwargs):
+        logger.info(f"PUT request received for idAgente: {kwargs['idAgente']}")
+        logger.info(f"PUT request data: {request.data}")
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True) #add partial=True
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(f"PUT request successful, data updated: {serializer.data}")
+                return Response(serializer.data)
+            else:
+                logger.error(f"PUT request failed: Validation errors: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except status.HTTP_404_NOT_FOUND:
+            logger.warning(f"PUT request failed: Object not found for idAgente: {kwargs['idAgente']}")
+            return Response({"message": "No record found with id_monitoria null"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"PUT request failed: An unexpected error occurred: {e}")
+            return Response({"message": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class Teste5(generics.ListAPIView):
+    serializer_class = DistribuicaoV2Serializer
+    lookup_field = 'idAgente'
+
+    def get_queryset(self):
+        idAgente = self.kwargs['idAgente']
+        logger.info(f"Getting queryset for idAgente: {idAgente}")
+        return modelDistribuicaoV2.objects.filter(idAgente=idAgente, id_monitoria__isnull=False).exclude(feedback=True)
+
+    def get(self, request, *args, **kwargs):
+        logger.info(f"GET request received for idAgente: {kwargs['idAgente']}")
+        try:
+            queryset = self.get_queryset()
+            if not queryset.exists():
+                logger.warning(f"No records found for idAgente: {kwargs['idAgente']}")
+                return Response({"message": "No records found"}, status=status.HTTP_404_NOT_FOUND)
+            
+            serializer = self.get_serializer(queryset, many=True)
+            logger.info(f"GET request successful, returning {len(serializer.data)} records")
+            return Response(serializer.data)
+            
+        except Exception as e:
+            logger.error(f"GET request failed: An unexpected error occurred: {e}")
+            return Response({"message": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DeleteAllData(APIView):
+    """
+    API endpoint to delete all data from the modelDistribuicaoV2 table.
+    """
+    def delete(self, request, format=None):
+        """
+        Deletes all records from the modelDistribuicaoV2 table.
+        """
+        try:
+            deleted_count, _ = modelDistribuicaoV2.objects.all().delete()
+            logger.info(f"Deleted {deleted_count} records from modelDistribuicaoV2")
+            return Response({"message": f"All data deleted successfully. {deleted_count} records were deleted."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error deleting data from modelDistribuicaoV2: {e}")
+            return Response({"message": "An error occurred while deleting data."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

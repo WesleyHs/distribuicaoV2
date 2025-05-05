@@ -5,15 +5,15 @@ from datetime import *
 class modelDistribuicaoV2(models.Model):
     id = models.AutoField(primary_key=True) # id criado automatimente
     id_monitoria = models.CharField(max_length=250, blank=True, null=True) #irá vir do front na monitoria
-    casosMonitorados = models.IntegerField() # criado automativamente
-    numero_monitoria = models.IntegerField() # automaticamente qtde de monitoria listado 1-4 exemplo
-    # analise= models.CharField(max_length=250, blank=True, null=True) # entender se é qual monitoria do agente no mes
+    casosMonitorados = models.IntegerField(null=True, blank=True) # criado automativamente
+    numero_monitoria = models.IntegerField(null=True, blank=True) # automaticamente qtde de monitoria listado 1-4 exemplo
+    analise= models.CharField(max_length=250, blank=True, null=True) # entender se é qual monitoria do agente no mes
     data_monitoria = models.DateTimeField(blank=True, null=True) #data que a monitoria está sendo realizada
     status_monitoria = models.BooleanField(default=False)
-    identificadora = models.CharField(editable=False, null=True, blank=True, unique=True, max_length=250)
+    # identificadora = models.CharField(editable=False, null=True, blank=True, unique=True, max_length=250)
 
     # monitoriasRealizadas= models.CharField(max_length=250, blank=True, null=True) # verificar se é redundante com o casos monitorados
-    # previsto= models.CharField(max_length=250, blank=True, null=True) ## verificar se é redundante com o casos monitorados
+    previsto= models.CharField(max_length=250, blank=True, null=True) ## verificar se é redundante com o casos monitorados
     consultorias= models.CharField(max_length=250, blank=True, null=True) # entender o campo consultoria 
     intervencoes= models.CharField(max_length=250, blank=True, null=True) # entender o campo intervenções
 
@@ -22,7 +22,8 @@ class modelDistribuicaoV2(models.Model):
     idLigacao= models.CharField(max_length=250, blank=True, null=True) # vem do front
     ticket= models.CharField(max_length=250, blank=True, null=True) # vem do front
     pedido= models.CharField(max_length=250, blank=True, null=True) # vem do front
-    formularioArea= models.JSONField(blank=True, null=True) # entender esse formulario, se irá ser um json e se precisa salvar só o nome e ter outro campo com o json dos cards
+    # F= models.CharField(max_length=250, blank=True, null=True) # vem do front
+    cards= models.JSONField(blank=True, null=True) # entender esse formulario, se irá ser um json e se precisa salvar só o nome e ter outro campo com o json dos cards
     resumoCaso= models.TextField(blank=True, null=True) # vem do front
     pontoAtencao= models.TextField(blank=True, null=True) #vem do front
     elogioCliente= models.TextField(blank=True, null=True) # vem d0o0 front
@@ -31,7 +32,7 @@ class modelDistribuicaoV2(models.Model):
 
     inicio = models.DateTimeField(blank=True, null=True) #inicio da monitoria definir
     fim = models.DateTimeField(blank=True, null=True) #quando clica no finaliza
-    tempo = models.DurationField(blank=True,  null=True, editable=False) #automatico
+    tempo_monitoria = models.DurationField(blank=True, null=True) #automatico
     nota = models.IntegerField(null=True) # nota da monitoria //verifica se ira fazer no front ou no back
 
     consultoria = models.BooleanField(default=False) #vem do front
@@ -44,12 +45,15 @@ class modelDistribuicaoV2(models.Model):
 
     intervencao = models.BooleanField(default=False) # vem do front
     comentario_intervencao = models.TextField(null=True, blank=True) 
+    motivo_intervencao = models.TextField(null=True, blank=True) 
+    data_ocorrencia_intervencao = models.DateTimeField(blank=True, null=True)
     acao_intervencao = models.CharField(null=True, blank=True, max_length=250)
     observacao_intervencao = models.CharField(null=True, blank=True, max_length=250)
     data_feedback_intervencao = models.DateTimeField(blank=True, null=True)
     contestacao_intervencao = models.CharField(max_length=250, blank=True, null=True)
     motivo_contestacao_intervencao = models.CharField(max_length=250, null=True, blank=True)
     intervencao_justificativa = models.CharField(max_length=250, null=True, blank=True)
+    
     
 
     alerta = models.BooleanField(default=False) #ter um botao no front
