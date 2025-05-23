@@ -9,5 +9,6 @@ urlpatterns = [
     path('teste4/<str:idAgente>/', views.Teste4.as_view(), name='teste4'),
     path('delete_all_data/', views.DeleteAllData.as_view(), name='delete_all_data'),
     path('teste5/<str:idAgente>/', views.Teste5.as_view(), name='teste5'),
-    
+    path('compare_status/', views.CompareStatus.as_view(), name='compare_status'),
+    path('compare_departments/', views.ComparativoAreaView.as_view(), name='compare_departments'),
 ]

@@ -32,7 +32,8 @@ class modelDistribuicaoV2(models.Model):
 
     inicio = models.DateTimeField(blank=True, null=True) #inicio da monitoria definir
     fim = models.DateTimeField(blank=True, null=True) #quando clica no finaliza
-    tempo_monitoria = models.DurationField(blank=True, null=True) #automatico
+    # tempo_monitoria = models.DurationField(blank=True, null=True) #automatico
+    tempo_monitoria = models.CharField(max_length=8, blank=True, null=True)
     nota = models.IntegerField(null=True) # nota da monitoria //verifica se ira fazer no front ou no back
 
     consultoria = models.BooleanField(default=False) #vem do front
@@ -53,10 +54,13 @@ class modelDistribuicaoV2(models.Model):
     contestacao_intervencao = models.CharField(max_length=250, blank=True, null=True)
     motivo_contestacao_intervencao = models.CharField(max_length=250, null=True, blank=True)
     intervencao_justificativa = models.CharField(max_length=250, null=True, blank=True)
+    idsIntervencao = models.CharField(max_length=250, null=True, blank=True)
+    protocolosIntervencao = models.CharField(max_length=250, null=True, blank=True)
     
     
 
     alerta = models.BooleanField(default=False) #ter um botao no front
+    alerta_comentario = models.TextField(blank=True, null=True)
     alerta_feedback = models.BooleanField(default=False) #quando foi realizado o alerta do feedback
     alerta_contestacao = models.TextField(blank=True, null=True)
 
@@ -87,21 +91,21 @@ class modelDistribuicaoV2(models.Model):
     gerente = models.CharField(max_length=250, blank=True, null=True) #vem do front
 
 
-    def save(self, *args, **kwargs):
-        if self.inicio and self.fim:
-            self.tempo = self.fim - self.inicio  
-        else:
-            self.tempo = None 
+    # def save(self, *args, **kwargs):
+    #     if self.inicio and self.fim:
+    #         self.tempo = self.fim - self.inicio  
+    #     else:
+    #         self.tempo = None 
 
-        super().save(*args, **kwargs)
+    #     super().save(*args, **kwargs)
     
     def post(self, request, *args, **kwargs):
         print(request.data)  
         return super().post(request, *args, **kwargs)
     
-    def save(self, *args, **kwargs):
-        self.identificadora = f"{self.numero_monitoria} {self.idAgente}"
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.identificadora = f"{self.numero_monitoria} {self.idAgente}"
+    #     super().save(*args, **kwargs)
 
 
     class Meta:
