@@ -11,6 +11,17 @@ from rest_framework.response import Response
 from django.db.models import Q
 import logging
 import numpy as np
+import os
+from dotenv import load_dotenv
+
+# Carrega as variáveis do .env
+load_dotenv()
+
+# Obtém a URL base do .env
+URL_BASE = os.getenv('URL_BASE')
+if not URL_BASE:
+    raise ValueError("URL_BASE não encontrada no arquivo .env")
+
 logger = logging.getLogger(__name__)
 
 class Teste(generics.ListCreateAPIView):
@@ -139,13 +150,13 @@ class CompareStatus(APIView):
     
     def get(self, request, format=None):
         try:
-            token = '38590d5eb1d0ec038d34057b004022eb8f2624eb'
+            token = os.getenv('TOKEN_API')
             headers = {
                 'Authorization': f'Token {token}'
             }
             
             # Fetch data from first endpoint
-            url8 = "http://127.0.0.1:8000/api/v1/distribuicaoV3/"
+            url8 = f"{URL_BASE}distribuicaoV3/"
             try:
                 url8_response = r.get(url8, headers=headers)
                 url8_response.raise_for_status()
@@ -159,7 +170,7 @@ class CompareStatus(APIView):
                 )
 
             # Fetch data from quadro endpoint
-            quadro_url = 'http://127.0.0.1:8000/api/v1/quadro_metas'
+            quadro_url = f"{URL_BASE}quadro_metas"
             try:
                 quadro_response = r.get(quadro_url, headers=headers)
                 quadro_response.raise_for_status()
@@ -276,13 +287,13 @@ class ComparativoAreaView(APIView):
     
     def get(self, request, format=None):
         try:
-            token = '38590d5eb1d0ec038d34057b004022eb8f2624eb'
+            token = os.getenv('TOKEN_API')
             headers = {
                 'Authorization': f'Token {token}'
             }
             
             # Fetch data from first endpoint
-            url8 = "http://127.0.0.1:8000/api/v1/distribuicaoV3/"
+            url8 = f"{URL_BASE}distribuicaoV3/"
             try:
                 url8_response = r.get(url8, headers=headers)
                 url8_response.raise_for_status()
@@ -296,7 +307,7 @@ class ComparativoAreaView(APIView):
                 )
 
             # Fetch data from quadro endpoint
-            quadro_url = 'http://127.0.0.1:8000/api/v1/quadro_metas'
+            quadro_url = f"{URL_BASE}quadro_metas"
             try:
                 quadro_response = r.get(quadro_url, headers=headers)
                 quadro_response.raise_for_status()
@@ -388,10 +399,18 @@ class ComparativoAreaView(APIView):
 class Teste3(APIView):
     def post(self, request):
         try:
-            token = '38590d5eb1d0ec038d34057b004022eb8f2624eb'
-            quadro = 'http://127.0.0.1:8000/api/v1/quadro_metas'
-            atribuido = 'http://127.0.0.1:8000/api/v1/atribuicao'
-            url8 = "http://127.0.0.1:8000/api/v1/distribuicaoV3/"
+            # Pega o token do .env
+            token = os.getenv('TOKEN_API')
+            if not token:
+                logger.error("TOKEN_API não encontrado no arquivo .env")
+                return Response({
+                    "message": "Token não configurado",
+                    "error": "TOKEN_API não encontrado no arquivo .env"
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            quadro = f"{URL_BASE}quadro_metas"
+            atribuido = f"{URL_BASE}atribuicao"
+            url8 = f"{URL_BASE}distribuicaoV3/"
             headers = {
                 'Authorization': f'Token {token}'
             }
