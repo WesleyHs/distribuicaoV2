@@ -415,91 +415,80 @@ class Teste3(APIView):
                 'Authorization': f'Token {token}'
             }
 
-            # Buscar dados do quadro
             quadro2 = r.get(quadro, headers=headers)
-            quadro2.raise_for_status()  # Verifica se a requisição foi bem sucedida
-            df_quadro2 = pd.DataFrame(quadro2.json())
-
-            # Buscar dados da atribuição
             atribuicao2 = r.get(atribuido, headers=headers)
-            atribuicao2.raise_for_status()
-            df_atribuido2 = pd.DataFrame(atribuicao2.json())
 
-            # Filtrar dados do quadro
+            df_quadro2 = pd.DataFrame(quadro2.json())
             df_quadro2 = df_quadro2[
                 (df_quadro2['mensuracao'] != '') & 
                 (df_quadro2['mensuracao'] != '-') &
                 (df_quadro2['mensuracao'] != 'Sem Mensuração')
             ]
-
-            # Separar ativos e inativos
-            df_ativo = df_quadro2[df_quadro2['status'] == 'Ativo'].copy()
-            df_inativo = df_quadro2[df_quadro2['status'] != 'Ativo'].copy()
+            df_atribuido2 = pd.DataFrame(atribuicao2.json())
+            
+            df_ativo = df_quadro2[df_quadro2['status'] == 'Ativo']
+            df_inativo = df_quadro2[df_quadro2['status'] != 'Ativo']
 
             departamentos_resultados = {}
 
-            # Processar ativos
             for departamento in df_ativo['departamento'].unique():
-                df_quadro = df_ativo[df_ativo['departamento'] == departamento].copy()
-                df_atribuido = df_atribuido2[df_atribuido2['setor_quadro'] == departamento].copy()
+                df_quadro = df_ativo[df_ativo['departamento'] == departamento]
+                df_atribuido = df_atribuido2[df_atribuido2['setor_quadro'] == departamento]
                 
                 if len(df_quadro) == 0 or len(df_atribuido) == 0:
-                    logger.warning(f"Departamento sem monitor ou departamento não é monitorado: {departamento}")
+                    print(f"Departamento sem monitor ou deparamento não é monitorado {departamento}")
                     continue
                 
                 monitores = df_atribuido['monitor'].tolist()
                 
                 if not monitores:
-                    logger.warning(f"Sem monitores para o departamento: {departamento}")
+                    print(f"Sem monitores para o departamento: {departamento}")
                     continue
                 
-                num_bins = len(monitores)
+                df_resultado = pd.DataFrame()
                 
-                if len(df_quadro) < num_bins:
-                    df_quadro['monitor'] = monitores[:len(df_quadro)]
-                else:
-                    df_quadro['monitor'] = pd.qcut(range(len(df_quadro)), q=num_bins, labels=False)
-                    df_quadro['monitor'] = df_quadro['monitor'].apply(lambda x: monitores[int(x)])
+                for _, row in df_atribuido.iterrows():
+                    monitor = row['monitor']
+                    pessoas = row['pessoas']
+                    
+                    df_monitor = df_quadro.sample(n=pessoas, replace=False) if len(df_quadro) >= pessoas else df_quadro
+                    df_monitor['monitor'] = monitor
+                    df_monitor['casosMonitorados'] = row['casosMonitorados']
+                    
+                    df_resultado = pd.concat([df_resultado, df_monitor])
+                    df_quadro = df_quadro.drop(df_monitor.index)
                 
-                df_resultado = df_quadro[['monitor', 'nome', 'id', 'departamento', 'status', 'email']].copy()
-                
-                casos_monitorados = df_atribuido.set_index('monitor')['casosMonitorados']
-                df_resultado['casosMonitorados'] = df_resultado['monitor'].map(casos_monitorados)
-                
-                df_resultado['casosMonitorados'] = df_resultado['casosMonitorados'].fillna(1).astype(int)
+                df_resultado = df_resultado[['monitor', 'nome', 'id', 'departamento', 'status', 'email', 'casosMonitorados']].copy()
                 
                 df_resultado = df_resultado.sort_values(by=['monitor', 'nome']).reset_index(drop=True)
                 
                 df_resultado['id_distribuicao'] = range(1, len(df_resultado) + 1)
+                
                 df_resultado['numero_monitoria'] = df_resultado.groupby(['monitor', 'nome']).cumcount() + 1
+                
                 df_resultado['departamento'] = departamento
                 
                 departamentos_resultados[departamento] = df_resultado
 
-            # Processar inativos
-            if not df_inativo.empty:
-                df_inativo['monitor'] = 'caroline'
-                df_inativo['casosMonitorados'] = 1
-                df_inativo['id_distribuicao'] = range(1, len(df_inativo) + 1)
-                df_inativo['numero_monitoria'] = 1
+            # Tratando os inativos
+            df_inativo['monitor'] = 'caroline'
+            df_inativo['casosMonitorados'] = 1
+            df_inativo['id_distribuicao'] = range(1, len(df_inativo) + 1)
+            df_inativo['numero_monitoria'] = 1
 
-            # Concatenar resultados
-            dfs_to_concat = list(departamentos_resultados.values())
-            if not df_inativo.empty:
-                dfs_to_concat.append(df_inativo)
-            
-            if not dfs_to_concat:
-                return Response({"message": "No data to process"}, status=status.HTTP_400_BAD_REQUEST)
-            
-            df_final = pd.concat(dfs_to_concat)
+            # Concatenando ativos e inativos
+            df_final = pd.concat([pd.concat(departamentos_resultados.values()), df_inativo])
             df_final = df_final.reset_index(drop=True)
+        
+            for dept, result in departamentos_resultados.items():
+                print(f"\nResultados para {dept}:")
 
-            # Renomear colunas
-            df_final = df_final.rename(columns={
-                'id': 'idAgente',
-                'id_distribuicao': 'id',
-                'casosMonitorados': 'previsto'
-            })
+            df_final = df_final.rename(
+                columns={
+                    'id': 'idAgente',
+                    'id_distribuicao': 'id', 
+                    'casosMonitorados': 'previsto'
+                })
 
             # Converter colunas numéricas
             numeric_cols = df_final.select_dtypes(include=['float64']).columns
