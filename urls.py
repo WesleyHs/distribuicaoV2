@@ -11,4 +11,5 @@ urlpatterns = [
     path('teste5/<str:idAgente>/', views.Teste5.as_view(), name='teste5'),
     path('compare_status/', views.CompareStatus.as_view(), name='compare_status'),
     path('compare_departments/', views.ComparativoAreaView.as_view(), name='compare_departments'),
+    path('update_monitoria/<str:id_monitoria>/', views.UpdateMonitoria.as_view(), name='update_monitoria'),
 ]

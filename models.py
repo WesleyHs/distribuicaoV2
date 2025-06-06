@@ -45,7 +45,6 @@ class modelDistribuicaoV2(models.Model):
 
 
     intervencao = models.BooleanField(default=False) # vem do front
-    comentario_intervencao = models.TextField(null=True, blank=True) 
     motivo_intervencao = models.TextField(null=True, blank=True) 
     data_ocorrencia_intervencao = models.DateTimeField(blank=True, null=True)
     acao_intervencao = models.CharField(null=True, blank=True, max_length=250)
@@ -56,6 +55,10 @@ class modelDistribuicaoV2(models.Model):
     intervencao_justificativa = models.CharField(max_length=250, null=True, blank=True)
     idsIntervencao = models.CharField(max_length=250, null=True, blank=True)
     protocolosIntervencao = models.CharField(max_length=250, null=True, blank=True)
+
+    comentario_intervencao = models.TextField(null=True, blank=True) #front monitoria
+    intervencao_feedback = models.BooleanField(default=False) #quando foi realizado o feedback
+
     
     
 
@@ -89,6 +92,7 @@ class modelDistribuicaoV2(models.Model):
     supervisor = models.CharField(max_length=250, blank=True, null=True) #vem do front
     coordenador = models.CharField(max_length=250, blank=True, null=True) # vem do front
     gerente = models.CharField(max_length=250, blank=True, null=True) #vem do front
+    tratado = models.BooleanField(default=False)
 
 
     # def save(self, *args, **kwargs):

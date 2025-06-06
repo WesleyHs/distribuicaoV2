@@ -525,3 +525,53 @@ class Teste3(APIView):
                 "message": "An error occurred while processing the data",
                 "error": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+
+class UpdateMonitoria(generics.RetrieveUpdateAPIView):
+    serializer_class = DistribuicaoV2Serializer
+    lookup_field = 'id_monitoria'
+    lookup_url_kwarg = 'id_monitoria'
+
+    def get_queryset(self):
+        id_monitoria = self.kwargs['id_monitoria']
+        logger.info(f"Getting queryset for id_monitoria: {id_monitoria}")
+        return modelDistribuicaoV2.objects.filter(id_monitoria=id_monitoria)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = queryset.first()
+        if obj is None:
+            logger.error(f"Object not found for id_monitoria: {self.kwargs['id_monitoria']}")
+            raise status.HTTP_404_NOT_FOUND
+        logger.info(f"Object found: {obj}")
+        return obj
+
+    def get(self, request, *args, **kwargs):
+        logger.info(f"GET request received for id_monitoria: {kwargs['id_monitoria']}")
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            logger.info(f"GET request successful, returning data: {serializer.data}")
+            return Response(serializer.data)
+        except status.HTTP_404_NOT_FOUND:
+            logger.warning(f"GET request failed: Object not found for id_monitoria: {kwargs['id_monitoria']}")
+            return Response({"message": "No record found with this id_monitoria"}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, *args, **kwargs):
+        logger.info(f"PUT request received for id_monitoria: {kwargs['id_monitoria']}")
+        logger.info(f"PUT request data: {request.data}")
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(f"PUT request successful, data updated: {serializer.data}")
+                return Response(serializer.data)
+            else:
+                logger.error(f"PUT request failed: Validation errors: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except status.HTTP_404_NOT_FOUND:
+            logger.warning(f"PUT request failed: Object not found for id_monitoria: {kwargs['id_monitoria']}")
+            return Response({"message": "No record found with this id_monitoria"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"PUT request failed: An unexpected error occurred: {e}")
+            return Response({"message": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
