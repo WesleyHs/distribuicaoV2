@@ -38,9 +38,12 @@ class modelDistribuicaoV2(models.Model):
 
     consultoria = models.BooleanField(default=False) #vem do front
     motivo_consultoria  = models.TextField(blank=True, null=True) #vem do front
+    
     analista = models.CharField(blank=True, null=True, max_length=250) #nome do analista de consultoria
-    consultoria_contestacao = models.DateTimeField(blank=True, null=True) #se a consultoria foi contestada
+    consultoria_contestacao = models.BooleanField(default=False) #se a consultoria foi contestada
     motivo_contestacao_consultoria = models.CharField(blank=True, null=True, max_length=250) # qual motivo da contestacao 
+    realizado_consultoria = models.BooleanField(default=False) #se a consultoria foi realizada
+
     data_consultoria = models.DateTimeField(blank=True, null=True) #data que a consultoria foi realizada
 
 
@@ -53,6 +56,7 @@ class modelDistribuicaoV2(models.Model):
     contestacao_intervencao = models.CharField(max_length=250, blank=True, null=True)
     motivo_contestacao_intervencao = models.CharField(max_length=250, null=True, blank=True)
     intervencao_justificativa = models.CharField(max_length=250, null=True, blank=True)
+    
     idsIntervencao = models.CharField(max_length=250, null=True, blank=True)
     protocolosIntervencao = models.CharField(max_length=250, null=True, blank=True)
 
@@ -66,17 +70,25 @@ class modelDistribuicaoV2(models.Model):
     alerta_comentario = models.TextField(blank=True, null=True)
     alerta_feedback = models.BooleanField(default=False) #quando foi realizado o alerta do feedback
     alerta_contestacao = models.TextField(blank=True, null=True)
+    alerta_justificativa = models.TextField(blank=True, null=True)
+
 
     observacoes_feedback = models.CharField(max_length=250, blank=True, null=True) #obserrvação no feedback
     feedback = models.BooleanField(default=False) #feedback realizado ou nao realizado
     #justificativa
 
     contestacao = models.BooleanField(default=False) #se teve contestacao
+    contestacao_motivo = models.CharField(max_length=250, blank=True, null=True) #motivo da contestacao
+
+
     aprovacao_contestacao = models.BooleanField(default=False) #se a contestação foi aprovada
-    retorno_contestacao = models.BooleanField(default=False)
     resposta_contestacao = models.TextField(blank=True, null=True) #vem do front
-    alterado = models.BooleanField(blank=True, null=True) #vem do front
     causador_contestacao = models.CharField(max_length=250, blank=True, null=True) #quem causou a contestacao
+    realizado_contestacao = models.BooleanField(default=False)
+
+    retorno_contestacao = models.BooleanField(default=False)
+    alterado = models.BooleanField(blank=True, null=True) #vem do front
+
 
     monitor = models.CharField(max_length=250, blank=True, null=True) #vem da monitores
     email_monitor = models.CharField(max_length=250, blank=True, null=True) #precisa do email
@@ -93,6 +105,9 @@ class modelDistribuicaoV2(models.Model):
     coordenador = models.CharField(max_length=250, blank=True, null=True) # vem do front
     gerente = models.CharField(max_length=250, blank=True, null=True) #vem do front
     tratado = models.BooleanField(default=False)
+    
+    macro_aplicada = models.CharField(max_length=250, blank=True, null=True)
+    macro_correta = models.CharField(max_length=250, blank=True, null=True)
 
 
     # def save(self, *args, **kwargs):
