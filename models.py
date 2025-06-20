@@ -29,7 +29,6 @@ class modelDistribuicaoV2(models.Model):
     elogioCliente= models.TextField(blank=True, null=True) # vem d0o0 front
     horario= models.CharField(max_length=250, blank=True, null=True) # vem do front
 
-
     inicio = models.DateTimeField(blank=True, null=True) #inicio da monitoria definir
     fim = models.DateTimeField(blank=True, null=True) #quando clica no finaliza
     # tempo_monitoria = models.DurationField(blank=True, null=True) #automatico
@@ -62,10 +61,7 @@ class modelDistribuicaoV2(models.Model):
 
     comentario_intervencao = models.TextField(null=True, blank=True) #front monitoria
     intervencao_feedback = models.BooleanField(default=False) #quando foi realizado o feedback
-
     
-    
-
     alerta = models.BooleanField(default=False) #ter um botao no front
     alerta_comentario = models.TextField(blank=True, null=True)
     alerta_feedback = models.BooleanField(default=False) #quando foi realizado o alerta do feedback
@@ -90,6 +86,7 @@ class modelDistribuicaoV2(models.Model):
     alterado = models.BooleanField(blank=True, null=True) #vem do front
 
 
+
     monitor = models.CharField(max_length=250, blank=True, null=True) #vem da monitores
     email_monitor = models.CharField(max_length=250, blank=True, null=True) #precisa do email
     id_monitor = models.IntegerField(blank=True, null=True)
@@ -108,6 +105,14 @@ class modelDistribuicaoV2(models.Model):
     
     macro_aplicada = models.CharField(max_length=250, blank=True, null=True)
     macro_correta = models.CharField(max_length=250, blank=True, null=True)
+    
+    
+    # funcoes novas back
+    updated_at = models.DateField(auto_now=True)
+    alterado_por = models.CharField(null=True, blank=True, max_length=250)
+    excluido_por = models.CharField(blank=True, null=True, max_length=250)
+
+
 
 
     # def save(self, *args, **kwargs):
