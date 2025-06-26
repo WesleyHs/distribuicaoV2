@@ -58,6 +58,8 @@ class modelDistribuicaoV2(models.Model):
     
     idsIntervencao = models.CharField(max_length=250, null=True, blank=True)
     protocolosIntervencao = models.CharField(max_length=250, null=True, blank=True)
+    data_intervencao_realizado = models.DateTimeField(blank=True, null=True)
+
 
     comentario_intervencao = models.TextField(null=True, blank=True) #front monitoria
     intervencao_feedback = models.BooleanField(default=False) #quando foi realizado o feedback
@@ -67,6 +69,8 @@ class modelDistribuicaoV2(models.Model):
     alerta_feedback = models.BooleanField(default=False) #quando foi realizado o alerta do feedback
     alerta_contestacao = models.TextField(blank=True, null=True)
     alerta_justificativa = models.TextField(blank=True, null=True)
+    data_alerta_realizado = models.DateTimeField(blank=True, null=True)
+
 
 
     observacoes_feedback = models.CharField(max_length=250, blank=True, null=True) #obserrvação no feedback
@@ -105,6 +109,7 @@ class modelDistribuicaoV2(models.Model):
     
     macro_aplicada = models.CharField(max_length=250, blank=True, null=True)
     macro_correta = models.CharField(max_length=250, blank=True, null=True)
+    formularioArea = models.CharField(max_length=250, blank=True, null=True)
     
     
     # funcoes novas back
